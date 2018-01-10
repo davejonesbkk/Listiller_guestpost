@@ -29,18 +29,44 @@ def page_parser(url):
 	for link in soup.find_all('a'):
 		links_list.append(link.get('href'))
 		
-	domain_parse(links_list)
+	ignore_domains = ['twitter.com', 'facebook.com', 'linkedin.com', 'listiller.com']
 	
-def domain_parse(links_list):
+	parsed_links = []
+	
+	links_list = map(lambda x: x.encode('ascii'), links_list)
+	
+	for link in links_list:
+		netloc = urlparse(link).netloc 
+		for domain in ignore_domains:
+			if netloc.endswith(domain): 
+				break 
+		else:
+			parsed_links.append(link) 
+				
+	for pl in parsed_links:
+		try:
+			parsed_links.remove('#')
+		except ValueError:
+			continue
+				
+	print parsed_links
+			
+		
+	domain_parse(parsed_links)
+		
+
+		
+def domain_parse(parsed_links):
 
 	domains = []
 	
-	for l in links_list:
-		l = urlparse(l)
-		domains.append(l.netloc)
-		
-	domain_check(domains, links_list)	
-		
+	for d in parsed_links:
+		dom = urlparse(d)
+		dn = '{uri.scheme}://{uri.netloc}/'.format(uri=dom)
+		domains.append(dn)
+	
+	domain_check(domains, parsed_links)
+	
 def domain_check(domains, links_list):
 
 	sites_data = []
@@ -72,6 +98,7 @@ def to_file(data):
 							
 		
 
+
 def site_data():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('target_url', help='Enter the full url of the page you wish to parse')
@@ -85,18 +112,3 @@ def site_data():
 if __name__ == '__main__':
 	site_data()
 	
-	
-
-	
-	
-	
-
-	
-	
-	
-	
-
-	
-
-
-
